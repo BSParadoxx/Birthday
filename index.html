@@ -225,8 +225,20 @@
     .moment-img-frame { position:relative; width:100%; max-width:420px; aspect-ratio:4/3; border-radius:4px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
     .moment-img-frame img { width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.6s ease; }
     .moment-img-frame:hover img { transform:scale(1.05); }
-    .moment-img-frame::after { content:''; position:absolute; inset:0; border:2px solid transparent; border-radius:4px; transition:border-color 0.4s; }
-    .moment-img-frame:hover::after { border-color:var(--gold); }
+    .moment-img-frame::after { content:''; position:absolute; inset:0; border-radius:4px; pointer-events:none; }
+    /* Always-on gold glow border */
+    .moment-img-frame {
+      box-shadow:
+        0 0 0 2px var(--gold),
+        0 0 18px 4px rgba(201,169,110,0.55),
+        0 0 40px 8px rgba(201,169,110,0.25),
+        0 20px 60px rgba(0,0,0,0.6);
+      animation: glow-pulse 2.5s ease-in-out infinite alternate;
+    }
+    @keyframes glow-pulse {
+      0%   { box-shadow: 0 0 0 2px var(--gold), 0 0 14px 4px rgba(201,169,110,0.4), 0 0 35px 8px rgba(201,169,110,0.18), 0 20px 60px rgba(0,0,0,0.6); }
+      100% { box-shadow: 0 0 0 2px var(--gold), 0 0 28px 8px rgba(201,169,110,0.7), 0 0 60px 14px rgba(201,169,110,0.35), 0 20px 60px rgba(0,0,0,0.6); }
+    }
     .moment-num { position:absolute; top:16px; left:16px; font-family:'Cormorant Garamond',serif; font-size:3rem; font-weight:300; font-style:italic; color:rgba(255,255,255,0.85); line-height:1; text-shadow:0 2px 12px rgba(0,0,0,0.5); z-index:2; }
 
     .moment-dot-col { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; }
@@ -268,9 +280,17 @@
       .lock-keypad{grid-template-columns:repeat(3,68px);gap:12px}
       .lock-key{width:68px;height:68px}
     }
+
+        
+
   </style>
 </head>
 <body>
+
+  <button class="setup-launch-btn" onclick="launchSite()">Launch Birthday Site ✦</button>
+  <span class="setup-skip" onclick="launchSite()">Skip & use placeholders</span>
+</div>
+
 
 <!-- ══════════ LOCK SCREEN ══════════ -->
 <div id="lock-screen">
@@ -366,87 +386,87 @@
 <section id="timeline">
   <div class="timeline-line"></div>
 
-  <div class="moment" data-song-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" data-song-name="The First Hello">
-    <div class="moment-img-wrap"><div class="moment-img-frame"><span class="moment-num">01</span><img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=700&q=80" alt=""/></div></div>
-    <div class="moment-dot-col"><div class="moment-dot"></div></div>
-    <div class="moment-text">
-      <p class="moment-year">✦ The Beginning</p>
-      <h3 class="moment-heading">The Day We<br/>First Met</h3>
-      <div class="moment-rule"></div>
-      <p class="moment-desc">I remember the exact second our worlds collided — the laughter that erupted out of nowhere, the instant comfort of feeling like I had known you forever. Some people walk into your life and quietly rearrange all the furniture. You were one of those people, Aarya.</p>
-      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg> The First Hello</span>
-    </div>
-  </div>
-
-  <div class="moment" data-song-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" data-song-name="Midnight Laughter">
-    <div class="moment-img-wrap"><div class="moment-img-frame"><span class="moment-num">02</span><img src="https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=700&q=80" alt=""/></div></div>
+  <div class="moment" data-song-url="Moment1.mp3" data-start-time="18" data-song-name="Qayde Se">
+    <div class="moment-img-wrap"><div class="moment-img-frame"><img src="IMG1.jpeg" alt=""/></div></div>
     <div class="moment-dot-col"><div class="moment-dot"></div></div>
     <div class="moment-text">
       <p class="moment-year">✦ Late Nights</p>
       <h3 class="moment-heading">Conversations<br/>Until 3 AM</h3>
       <div class="moment-rule"></div>
-      <p class="moment-desc">Those nights where time dissolved and neither of us wanted to say goodnight. We talked about everything and nothing — big dreams, small fears, the kind of secrets you only whisper under moonlight. Those hours became the foundation of something real.</p>
-      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg> Midnight Laughter</span>
+      <p class="moment-desc">Those nights where time dissolved and neither of us wanted to say goodnight. I always wanted to hear about your day, to keep listening, to keep holding on to every little thing you shared. When you sent me your first photo, I was so happy my heart felt full. In that moment, I started believing that I truly mattered to you. During Dashain, in Vrindaban, we talked all day and all night. I'll never forget how you made my birthday so special, in ways no one else ever had. You accepted me in your life!</p>
+      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg> Qayde Se</span>
     </div>
   </div>
 
-  <div class="moment" data-song-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" data-song-name="Road to Nowhere">
-    <div class="moment-img-wrap"><div class="moment-img-frame"><span class="moment-num">03</span><img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=700&q=80" alt=""/></div></div>
+  <div class="moment" data-song-url="Moment2.mp3" data-start-time="14" data-song-name="Mann Kaa Bhawana">
+    <div class="moment-img-wrap"><div class="moment-img-frame"><img src="IMG2.jpeg" alt=""/></div></div>
     <div class="moment-dot-col"><div class="moment-dot"></div></div>
     <div class="moment-text">
-      <p class="moment-year">✦ Adventures</p>
-      <h3 class="moment-heading">The Road Trip<br/>We Planned Overnight</h3>
+      <p class="moment-year">✦ Before we met</p>
+      <h3 class="moment-heading">Excitment<br/>for the first meet</h3>
       <div class="moment-rule"></div>
-      <p class="moment-desc">A half-baked plan, a full tank of gas, and the two of us headed somewhere we'd never been. We got lost, sang badly to every song, and found the most beautiful place neither of us expected. That's what you do — you make ordinary roads feel like magic.</p>
-      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg> Road to Nowhere</span>
+      <p class="moment-desc">I remember how we planned our first meeting, your nervousness hidden behind quiet smiles. Our first video call turned shyness into comfort, distance into closeness. On the day I almost gave up during my physical exam, thinking of you gave me strength. Sharing daily photos, small moments, and simple talks felt precious. And the way we dreamed about the future together made everything feel possible.</p>
+      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg> Mann Kaa Bhawana</span>
     </div>
   </div>
 
-  <div class="moment" data-song-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" data-song-name="Soft Rain">
-    <div class="moment-img-wrap"><div class="moment-img-frame"><span class="moment-num">04</span><img src="https://images.unsplash.com/photo-1499810631641-541e76d678a2?w=700&q=80" alt=""/></div></div>
+  <div class="moment" data-song-url="Moment3.mp3" data-start-time="6" data-song-name="Hawayein">
+    <div class="moment-img-wrap"><div class="moment-img-frame"><img src="IMG3.jpeg" alt=""/></div></div>
     <div class="moment-dot-col"><div class="moment-dot"></div></div>
     <div class="moment-text">
-      <p class="moment-year">✦ Tough Days</p>
-      <h3 class="moment-heading">When You Showed Up<br/>Without Being Asked</h3>
+      <p class="moment-year">✦ Regular Meet</p>
+      <h3 class="moment-heading">6 pm<br/>After office Walk</h3>
       <div class="moment-rule"></div>
-      <p class="moment-desc">I didn't call, I didn't say a word — but somehow you knew. You arrived at my door with chai and your quiet presence, and that was enough. More than enough. The way you love people, Aarya — it's without conditions and without fanfare. It's the rarest kind.</p>
-      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg> Soft Rain</span>
+      <p class="moment-desc">I always waited for the moment your office hours would end. Our walks through Sankhamul Galli, listening about your day, us quietly deciding where to sit are etched in my heart. The bench beside the Bagmati River is still vivid in my mind; that was where I first held your hand and hugged you. And those days at UN Park, they remain some of my most beautiful memories.</p>
+      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg>Hawayein</span>
     </div>
   </div>
 
-  <div class="moment" data-song-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" data-song-name="Golden Hour">
-    <div class="moment-img-wrap"><div class="moment-img-frame"><span class="moment-num">05</span><img src="https://images.unsplash.com/photo-1536623975707-c4b3b2af565d?w=700&q=80" alt=""/></div></div>
+  <div class="moment" data-song-url="Moment4.mp3" data-start-time="15" data-song-name="Dil Na Jaaneya">
+    <div class="moment-img-wrap"><div class="moment-img-frame"><img src="IMG4.jpeg" alt=""/></div></div>
     <div class="moment-dot-col"><div class="moment-dot"></div></div>
     <div class="moment-text">
-      <p class="moment-year">✦ Celebrations</p>
-      <h3 class="moment-heading">Dancing Like<br/>Nobody Was Watching</h3>
+      <p class="moment-year">✦ Together</p>
+      <h3 class="moment-heading">Under The Same Roof and places<br/>Dil Na Jaaneya</h3>
       <div class="moment-rule"></div>
-      <p class="moment-desc">The music was loud, the lights were warm, and we completely let go. You grabbed my hand and pulled me into the middle of it all — fearless and radiant. I think about that night whenever I need to remember what pure joy looks like. It looks like you.</p>
-      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg> Golden Hour</span>
+      <p class="moment-desc">We shared emotions and pain, cried together, and somehow grew stronger through it all. We cooked side by side, learned each other's habits, even the quiet tones of our moods. Our first meals outside together, the trips to Budhanilkantha, Kirtipur, Dhulikhel, Bhaktapur, the night rides, Christmas, we made memories everywhere. Your presence walking beside me always lifted my heart. It was so hard without you when I went to Biratnagar.</p>
+      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg> Dil Na Jaaneya</span>
     </div>
   </div>
 
-  <div class="moment" data-song-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" data-song-name="Quiet Mornings">
-    <div class="moment-img-wrap"><div class="moment-img-frame"><span class="moment-num">06</span><img src="https://images.unsplash.com/photo-1464979681340-bdd28a61699e?w=700&q=80" alt=""/></div></div>
+  <div class="moment" data-song-url="Moment5.mp3" data-start-time="20" data-song-name="Perfect">
+    <div class="moment-img-wrap"><div class="moment-img-frame"><img src="IMG5.jpeg" alt=""/></div></div>
     <div class="moment-dot-col"><div class="moment-dot"></div></div>
     <div class="moment-text">
-      <p class="moment-year">✦ Still Mornings</p>
-      <h3 class="moment-heading">Coffee, Silence<br/>& You</h3>
+      <p class="moment-year">✦ Beautiful</p>
+      <h3 class="moment-heading">Mature<br/>Your Kind Heart</h3>
       <div class="moment-rule"></div>
-      <p class="moment-desc">Not every memory has to be loud to matter. Some of my favourites are simply mornings — two mugs, a window, and the comfortable silence only true friends share. Those quiet moments remind me that your company alone is enough. Always has been.</p>
-      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg> Quiet Mornings</span>
+      <p class="moment-desc">You are the most beautiful woman I know. Your smile brings a calm to my heart that nothing else can. I remember the way you cared for that dog, it showed me how deeply kind you are. You give so much love to your family and to others, without selfishness or pride, just quiet goodness. You lift me when I feel low, simply by being you. Your eyes, your hair, your lips, I can feel their presence even when you're not beside me. To me, you are not just pretty, you are the prettiest, inside and out.</p>
+      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg> Perfect</span>
     </div>
   </div>
 
-  <div class="moment" data-song-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3" data-song-name="Here's to You">
-    <div class="moment-img-wrap"><div class="moment-img-frame"><span class="moment-num">07</span><img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=700&q=80" alt=""/></div></div>
+  <div class="moment" data-song-url="Moment6.mp3" data-start-time="15" data-song-name="Dherai Dherai Aauncha Mana Ma">
+    <div class="moment-img-wrap"><div class="moment-img-frame"><img src="IMG6.jpeg" alt=""/></div></div>
+    <div class="moment-dot-col"><div class="moment-dot"></div></div>
+    <div class="moment-text">
+      <p class="moment-year">✦ Your New Begining</p>
+      <h3 class="moment-heading">Degree Completion<br/>Proud Of You</h3>
+      <div class="moment-rule"></div>
+      <p class="moment-desc">I am so proud of you for completing your degree. I still remember when you told me how difficult your first year was, how heavy everything felt then. From that struggle to becoming one of the finest students in your batch you truly did your best. You are a woman who rose from a hard place through strength and perseverance, and you did it on your own. I will always stand by you and do whatever I can to support your growth in life. You are a strong, admirable, and truly great woman.</p>
+      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg>Dherai Dherai Aauncha Mana Ma</span>
+    </div>
+  </div>
+
+  <div class="moment" data-song-url="Moment7.mp3" data-start-time="12" data-song-name="Kal Chaudhvin Ki Raat Thi">
+    <div class="moment-img-wrap"><div class="moment-img-frame"><img src="IMG7.jpeg" alt=""/></div></div>
     <div class="moment-dot-col"><div class="moment-dot"></div></div>
     <div class="moment-text">
       <p class="moment-year">✦ Right Now</p>
       <h3 class="moment-heading">This Moment —<br/>Your Birthday</h3>
       <div class="moment-rule"></div>
-      <p class="moment-desc">And here we are — another year around the sun, and I couldn't be more grateful that yours and mine have kept orbiting together. Happy Birthday, Aarya. Every single memory on this page is a gift you gave me simply by being you. Here's to a thousand more.</p>
-      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg> Here's to You</span>
+      <p class="moment-desc">You've completed 22 beautiful years of your life. Even though I couldn't be with you on your previous birthdays, I promise to be there for every one that comes next—lighting candles, sharing smiles, and celebrating you. I will support you in everything you do and stand beside you as you grow into the best version of yourself.<br/>Happy Birthday, darling. 💙</p>
+      <span class="moment-song"><svg viewBox="0 0 24 24"><path d="M12 3v9.28a4 4 0 1 0 2 3.44V3h-2z"/></svg> Kal Chaudhvin Ki Raat Thi </span>
     </div>
   </div>
 </section>
@@ -490,7 +510,7 @@
   function unlock() {
     const ls = document.getElementById('lock-screen');
     ls.classList.add('unlocking');
-    setTimeout(() => { ls.classList.add('hidden'); }, 650);
+    setTimeout(() => { ls.classList.add('hidden'); window.scrollTo({top:0,behavior:'instant'}); }, 650);
 
     // Passcode tap = real user gesture. Prime audio so autoplay works later.
     audio.load();
@@ -533,8 +553,7 @@
     document.getElementById('hero').appendChild(p);
   }
 
-  /* Auto scroll */
-  setTimeout(() => document.getElementById('celebrate').scrollIntoView({behavior:'smooth'}), 3000);
+  /* Auto scroll removed — page starts at top after unlock */
 
   /* ══════════ MUSIC ENGINE ══════════
      Rules:
@@ -559,7 +578,7 @@
 
   // Pre-load first song silently so it's buffered
   if (moments.length) {
-    audio.src = moments[0].dataset.songUrl;
+    audio.src = moments[0].dataset.songUrl; // preloaded
     audio.volume = 0;
     currentUrl = moments[0].dataset.songUrl;
     titleEl.textContent = moments[0].dataset.songName;
@@ -583,16 +602,20 @@
     eq.classList.toggle('paused', !playing);
   }
 
-  function swapSong(url, name) {
-    if (currentUrl === url) return; // same song, do nothing
+  function swapSong(url, name, startTime) {
+    if (currentUrl === url) return;
     currentUrl = url;
     titleEl.textContent = name;
     fadeVol(audio.volume, 0, 300);
     setTimeout(() => {
       audio.src = url;
       audio.volume = 0;
+      audio.currentTime = startTime || 0;
       if (!userPaused) {
-        audio.play().then(() => { setUI(true); fadeVol(0, 0.45, 900); }).catch(()=>{});
+        audio.play().then(() => {
+          audio.currentTime = startTime || 0;
+          setUI(true); fadeVol(0, 0.45, 900);
+        }).catch(()=>{});
       }
     }, 320);
   }
@@ -634,10 +657,13 @@
         if (currentUrl === url) {
           // First moment — just play what's already loaded
           if (!isPlaying) {
-            audio.play().then(() => { setUI(true); fadeVol(0, 0.45, 900); }).catch(()=>{});
+            const st = parseFloat(e.target.dataset.startTime) || 0;
+            audio.currentTime = st;
+            audio.play().then(() => { audio.currentTime = st; setUI(true); fadeVol(0, 0.45, 900); }).catch(()=>{});
           }
         } else {
-          swapSong(url, name);
+          const st = parseFloat(e.target.dataset.startTime) || 0;
+        swapSong(url, name, st);
         }
       } else if (!userStarted) {
         // Not unlocked yet — just update title
