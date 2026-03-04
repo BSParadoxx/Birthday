@@ -664,15 +664,20 @@
     fadeVol(audio.volume, 0, 300);
     setTimeout(() => {
       audio.src = url;
+      audio.load();
       audio.volume = 0;
-      audio.currentTime = currentStart;
-      if (!userPaused) {
-        audio.play().then(() => {
-          audio.currentTime = currentStart;
-          setUI(true);
-          fadeVol(0, 0.45, 900);
-        }).catch(() => {});
-      }
+      audio.oncanplay = null;
+      audio.oncanplay = () => {
+        audio.oncanplay = null;
+        audio.currentTime = currentStart;
+        if (!userPaused) {
+          audio.play().then(() => {
+            audio.currentTime = currentStart;
+            setUI(true);
+            fadeVol(0, 0.45, 900);
+          }).catch(() => {});
+        }
+      };
     }, 320);
   }
 
