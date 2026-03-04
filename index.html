@@ -207,6 +207,7 @@
     #intro-moment .moment-dot-col  { grid-column:2 !important; grid-row:1 !important; }
     #intro-moment .moment-img-wrap { grid-column:3 !important; grid-row:1 !important; }
     #intro-moment .moment-year     { color:var(--rose); }
+    #intro-moment { opacity:1 !important; transform:none !important; }
 
     /* ══════════ TIMELINE ══════════ */
     #timeline { background:var(--dark); padding:0 0 140px; position:relative; }
@@ -285,6 +286,8 @@
       #intro-moment .moment-text{grid-column:2!important;grid-row:1!important}
       .moment-img-wrap{padding:16px 20px}
       .moment-text{padding:30px 20px}
+      #intro-moment{min-height:auto}
+      #intro-moment .moment-img-wrap{min-height:220px}
       #music-bar{min-width:180px;right:12px;bottom:12px}
       .lock-keypad{grid-template-columns:repeat(3,68px);gap:12px}
       .lock-key{width:68px;height:68px}
@@ -729,7 +732,7 @@
         }
       }
     });
-  }, { threshold: 0.35 });
+  }, { threshold: 0.1 });
 
   moments.forEach(m => obs.observe(m));
 </script>
