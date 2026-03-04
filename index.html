@@ -207,7 +207,6 @@
     #intro-moment .moment-dot-col  { grid-column:2 !important; grid-row:1 !important; }
     #intro-moment .moment-img-wrap { grid-column:3 !important; grid-row:1 !important; }
     #intro-moment .moment-year     { color:var(--rose); }
-    #intro-moment { opacity:1 !important; transform:none !important; }
 
     /* ══════════ TIMELINE ══════════ */
     #timeline { background:var(--dark); padding:0 0 140px; position:relative; }
@@ -400,7 +399,7 @@
   <div class="timeline-line"></div>
 
   <!-- INTRO MOMENT (inside timeline so spine covers it) -->
-<div id="intro-moment" class="moment" data-song-url="Momentt.mp3" data-start-time="29" data-song-name="Raktim">
+<div id="intro-moment" class="moment visible" data-song-url="Momentt.mp3" data-start-time="29" data-song-name="Raktim">
   <div class="moment-img-wrap">
     <div class="moment-img-frame">
       <img src="IMGi.jpeg" alt=""/>
@@ -555,6 +554,9 @@
       setUI(true);
       fadeVol(0, 0.45, 900);
     }).catch(() => {});
+
+    // Trigger scroll check after unlock animation settles
+    setTimeout(() => window.dispatchEvent(new Event('unlocked')), 700);
   }
 
   document.querySelectorAll('.lock-key[data-num]').forEach(key => {
@@ -607,7 +609,7 @@
   const eq        = document.getElementById('eq');
 
   // ── Intro song: plays right after passcode unlock, on hero/intro sections ──
-  const INTRO_SONG = { url: 'Momentt.mp3', name: 'Raktim', start: 29 };
+  const INTRO_SONG = { url: 'Moment.mp3', name: 'Magic', start: 18 };
 
   let currentUrl    = null;   // url of the currently loaded song
   let currentStart  = 0;      // the start-time this song should loop back to
@@ -695,46 +697,79 @@
      Hero/intro → play intro song.
      Moment → play that moment's song.
   */
+  // ── Reveal observer (visibility only, no music logic) ──
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  moments.forEach(m => revealObs.observe(m));
+
+  // ── Song control: find the moment whose CENTER is closest to screen center ──
+  // This is the only place songs change — no race conditions, no random jumps.
   const heroEl  = document.getElementById('hero');
   const introEl = document.getElementById('moments-intro');
 
-  function handleIntroSection() {
-    if (!userStarted || userPaused) return;
-    swapSong(INTRO_SONG.url, INTRO_SONG.name, INTRO_SONG.start);
+  function getActiveMoment() {
+    const mid = window.innerHeight / 2;
+    let best = null, bestDist = Infinity;
+    moments.forEach(m => {
+      const r = m.getBoundingClientRect();
+      const center = r.top + r.height / 2;
+      const dist = Math.abs(center - mid);
+      if (dist < bestDist) { bestDist = dist; best = m; }
+    });
+    return best;
   }
 
-  const heroObs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) handleIntroSection(); });
-  }, { threshold: 0.3 });
+  function getActiveSection() {
+    // Returns 'hero' if hero/intro is most centered, else returns the closest moment el
+    const mid = window.innerHeight / 2;
+    // Check hero
+    const heroR = heroEl ? heroEl.getBoundingClientRect() : null;
+    const introR = introEl ? introEl.getBoundingClientRect() : null;
+    let heroDist = Infinity;
+    if (heroR && heroR.bottom > 0 && heroR.top < window.innerHeight)
+      heroDist = Math.abs((heroR.top + heroR.height / 2) - mid);
+    if (introR && introR.bottom > 0 && introR.top < window.innerHeight)
+      heroDist = Math.min(heroDist, Math.abs((introR.top + introR.height / 2) - mid));
 
-  if (heroEl)  heroObs.observe(heroEl);
-  if (introEl) heroObs.observe(introEl);
+    const best = getActiveMoment();
+    if (!best) return { type: 'hero' };
+    const r = best.getBoundingClientRect();
+    const momentDist = Math.abs((r.top + r.height / 2) - mid);
+    if (heroDist < momentDist) return { type: 'hero' };
+    return { type: 'moment', el: best };
+  }
 
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (!e.isIntersecting) return;
-      e.target.classList.add('visible');
+  let scrollTimer = null;
+  let lastSongUrl = null;
 
-      const url  = e.target.dataset.songUrl;
-      const name = e.target.dataset.songName;
-      const st   = parseFloat(e.target.dataset.startTime) || 0;
-
-      if (userStarted && !userPaused) {
-        swapSong(url, name, st);
-      } else if (!userStarted) {
-        // Not unlocked yet — just update title display
-        if (currentUrl !== url) {
-          currentUrl   = url;
-          currentStart = st;
-          audio.src    = url;
-          audio.volume = 0;
-          titleEl.textContent = name;
-        }
+  function onScroll() {
+    // Debounce — wait until scrolling settles for 120ms
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      if (!userStarted || userPaused) return;
+      const active = getActiveSection();
+      let url, name, st;
+      if (active.type === 'hero') {
+        url = INTRO_SONG.url; name = INTRO_SONG.name; st = INTRO_SONG.start;
+      } else {
+        url  = active.el.dataset.songUrl;
+        name = active.el.dataset.songName;
+        st   = parseFloat(active.el.dataset.startTime) || 0;
       }
-    });
-  }, { threshold: 0.1 });
+      if (url !== lastSongUrl) {
+        lastSongUrl = url;
+        swapSong(url, name, st);
+      }
+    }, 120);
+  }
 
-  moments.forEach(m => obs.observe(m));
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // After unlock, trigger a scroll check so the right song starts
+  window.addEventListener('unlocked', () => {
+    setTimeout(onScroll, 500);
+  });
 </script>
 </body>
 </html>
