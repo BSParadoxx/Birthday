@@ -202,11 +202,7 @@
     @keyframes eq-bounce { 0%{transform:scaleY(0.4)} 100%{transform:scaleY(1)} }
     .eq.paused .eq-bar { animation-play-state:paused; }
 
-    /* ══════════ INTRO MOMENT ══════════ */
-    #intro-moment .moment-text     { grid-column:1 !important; grid-row:1 !important; }
-    #intro-moment .moment-dot-col  { grid-column:2 !important; grid-row:1 !important; }
-    #intro-moment .moment-img-wrap { grid-column:3 !important; grid-row:1 !important; }
-    #intro-moment .moment-year     { color:var(--rose); }
+
 
     /* ══════════ TIMELINE ══════════ */
     #timeline { background:var(--dark); padding:0 0 140px; position:relative; }
@@ -275,14 +271,11 @@
       .timeline-line{left:20px}
       .moment{grid-template-columns:40px 1fr;grid-template-rows:auto auto;min-height:unset}
       .moment:nth-child(odd) .moment-img-wrap,
-      .moment:nth-child(even) .moment-img-wrap,
-      #intro-moment .moment-img-wrap{grid-column:2!important;grid-row:2!important}
+      .moment:nth-child(even) .moment-img-wrap
       .moment:nth-child(odd) .moment-dot-col,
-      .moment:nth-child(even) .moment-dot-col,
-      #intro-moment .moment-dot-col{grid-column:1!important;grid-row:1!important}
+      .moment:nth-child(even) .moment-dot-col
       .moment:nth-child(odd) .moment-text,
-      .moment:nth-child(even) .moment-text,
-      #intro-moment .moment-text{grid-column:2!important;grid-row:1!important}
+      .moment:nth-child(even) .moment-text
       .moment-img-wrap{padding:16px 20px}
       .moment-text{padding:30px 20px}
       #intro-moment{min-height:auto}
@@ -398,8 +391,7 @@
 <section id="timeline">
   <div class="timeline-line"></div>
 
-  <!-- INTRO MOMENT (inside timeline so spine covers it) -->
-<div id="intro-moment" class="moment visible" data-song-url="Momentt.mp3" data-start-time="29" data-song-name="Raktim">
+  <div class="moment" data-song-url="Momentt.mp3" data-start-time="29" data-song-name="Raktim">
   <div class="moment-img-wrap">
     <div class="moment-img-frame">
       <img src="IMGi.jpeg" alt=""/>
