@@ -541,20 +541,55 @@
     ls.classList.add('unlocking');
     setTimeout(() => { ls.classList.add('hidden'); window.scrollTo({top:0,behavior:'instant'}); }, 650);
 
-    // Passcode tap = real user gesture → start intro music immediately
+    // Passcode tap = real user gesture → unlock ALL audio here
     userStarted = true;
     userPaused  = false;
-    audio.src         = INTRO_SONG.url;
-    audio.volume      = 0;
-    audio.currentTime = INTRO_SONG.start;
-    currentUrl        = INTRO_SONG.url;
-    titleEl.textContent = INTRO_SONG.name;
-    audio.play().then(() => {
-      audio.currentTime = INTRO_SONG.start;
-      setUI(true);
-      fadeVol(0, 0.45, 900);
 
-    }).catch(() => {});
+    // Step 1: Play Momentt.mp3 directly inside gesture — this permanently unlocks it
+    audio.src         = 'Momentt.mp3';
+    audio.volume      = 0;
+    audio.load();
+    audio.currentTime = 0;
+    currentUrl        = 'Momentt.mp3';
+    currentStart      = 29;
+    titleEl.textContent = 'Raktim';
+
+    audio.play().then(() => {
+      // Step 2: Immediately swap to Coldplay for the hero sections
+      audio.oncanplay = null;
+      fadeVol(0, 0, 100);
+      setTimeout(() => {
+        audio.pause();
+        audio.src         = INTRO_SONG.url;
+        audio.volume      = 0;
+        audio.load();
+        currentUrl        = INTRO_SONG.url;
+        currentStart      = INTRO_SONG.start;
+        titleEl.textContent = INTRO_SONG.name;
+        audio.oncanplay = function() {
+          audio.oncanplay = null;
+          audio.currentTime = INTRO_SONG.start;
+          audio.play().then(() => {
+            audio.currentTime = INTRO_SONG.start;
+            setUI(true);
+            fadeVol(0, 0.45, 900);
+          }).catch(() => {});
+        };
+      }, 200);
+    }).catch(() => {
+      // Fallback: just play Coldplay directly
+      audio.src         = INTRO_SONG.url;
+      audio.volume      = 0;
+      audio.load();
+      currentUrl        = INTRO_SONG.url;
+      currentStart      = INTRO_SONG.start;
+      titleEl.textContent = INTRO_SONG.name;
+      audio.play().then(() => {
+        audio.currentTime = INTRO_SONG.start;
+        setUI(true);
+        fadeVol(0, 0.45, 900);
+      }).catch(() => {});
+    });
 
     // Preload all moment songs inside user gesture context so GitHub allows them
     ['Momentt.mp3','Moment1.mp3','Moment2.mp3','Moment3.mp3','Moment4.mp3','Moment5.mp3','Moment6.mp3','Moment7.mp3'].forEach(src => {
@@ -629,12 +664,12 @@
 
   const moments = document.querySelectorAll('.moment');
 
-  // Pre-load intro song silently so it's buffered on page load
-  audio.src    = INTRO_SONG.url;
+  // Pre-load Momentt.mp3 on main audio element — avoids any swap for first moment
+  audio.src    = 'Momentt.mp3';
   audio.volume = 0;
-  currentUrl   = INTRO_SONG.url;
-  currentStart = INTRO_SONG.start;
-  titleEl.textContent = INTRO_SONG.name;
+  currentUrl   = 'Momentt.mp3';
+  currentStart = 29;
+  titleEl.textContent = 'Raktim';
 
   // ── When a song reaches its end, restart from its own start-time ──
   audio.addEventListener('ended', () => {
