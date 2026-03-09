@@ -540,42 +540,15 @@
     const ls = document.getElementById('lock-screen');
     ls.classList.add('unlocking');
     setTimeout(() => { ls.classList.add('hidden'); window.scrollTo({top:0,behavior:'instant'}); }, 650);
-
-    // Passcode tap = real user gesture → unlock audio directly here
-    userStarted = true;
-    userPaused  = false;
-
-    // Create & resume AudioContext inside gesture — permanently unlocks audio on GitHub Pages
-    unlockAudioContext();
-
-    // Play Coldplay intro directly inside gesture — this permanently unlocks the audio element
-    audio.src         = INTRO_SONG.url;
-    audio.volume      = 0;
     audio.load();
-    currentUrl        = INTRO_SONG.url;
-    currentStart      = INTRO_SONG.start;
-    titleEl.textContent = INTRO_SONG.name;
-
     audio.play().then(() => {
-      audio.currentTime = INTRO_SONG.start;
-      setUI(true);
-      fadeVol(0, 0.45, 900);
-    }).catch(() => {
-      // If autoplay still blocked, wait for canplay
-      audio.oncanplay = function() {
-        audio.oncanplay = null;
-        audio.currentTime = INTRO_SONG.start;
-        audio.play().then(() => {
-          setUI(true);
-          fadeVol(0, 0.45, 900);
-        }).catch(() => {});
-      };
-    });
-
-    // Trigger scroll check after unlock animation settles
-    setTimeout(() => window.dispatchEvent(new Event('unlocked')), 700);
+      audio.currentTime=18; setUI(true); fadeVol(0,0.45,900); userStarted=true;
+      // Prime Momentt.mp3 inside gesture so GitHub allows it later
+      const primer = new Audio('Momentt.mp3');
+      primer.volume=0;
+      primer.play().then(()=>{ primer.pause(); primer.src=''; }).catch(()=>{});
+    }).catch(() => { userStarted=true; });
   }
-
   document.querySelectorAll('.lock-key[data-num]').forEach(key => {
     key.addEventListener('click', () => {
       if (entered.length >= 4) return;
@@ -618,185 +591,45 @@
      6. Coming back to a section → song resumes from where it was left off
         (unless it ended, in which case it loops from its own start-time)
   ══════════════════════════════════ */
-  const audio     = document.getElementById('bg-audio');
-  const titleEl   = document.getElementById('music-title');
-  const toggleBtn = document.getElementById('music-toggle');
-  const iconPlay  = document.getElementById('icon-play');
-  const iconPause = document.getElementById('icon-pause');
-  const eq        = document.getElementById('eq');
-
-  const INTRO_SONG = { url: 'Moment.mp3', name: 'Magic', start: 18 };
-
-  let currentUrl   = null;
-  let currentStart = 0;
-  let isPlaying    = false;
-  let userStarted  = false;
-  let userPaused   = false;
-  let audioCtx     = null;
-
-  const moments = document.querySelectorAll('.moment');
-
-  // ── Unlock Web Audio Context on first gesture (passcode tap) ──
-  // This is the key fix for GitHub Pages: once AudioContext is resumed
-  // inside a user gesture, all subsequent audio.play() calls are allowed
-  // even from scroll callbacks and setTimeout chains.
-  function unlockAudioContext() {
-    if (audioCtx) return;
-    try {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const src = audioCtx.createMediaElementSource(audio);
-      src.connect(audioCtx.destination);
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-    } catch(e) {}
-  }
-
-  function fadeVol(from, to, ms) {
-    const steps = 30, dt = ms / steps;
-    let n = 0;
-    audio.volume = Math.max(0, Math.min(1, from));
-    const t = setInterval(() => {
-      n++;
-      audio.volume = Math.max(0, Math.min(1, from + (to - from) * (n / steps)));
-      if (n >= steps) clearInterval(t);
-    }, dt);
-  }
-
-  function setUI(playing) {
-    isPlaying = playing;
-    iconPlay.style.display  = playing ? 'none' : 'block';
-    iconPause.style.display = playing ? 'block' : 'none';
-    eq.classList.toggle('paused', !playing);
-  }
-
-  function playCurrent() {
-    if (userPaused) return;
-    // Resume AudioContext if suspended (mobile browsers suspend it when idle)
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    audio.play().then(() => {
-      setUI(true);
-      fadeVol(0, 0.45, 800);
-    }).catch(() => {
-      setTimeout(() => {
-        if (userPaused) return;
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        audio.play().then(() => { setUI(true); fadeVol(0, 0.45, 600); }).catch(() => {});
-      }, 300);
-    });
-  }
-
-  function swapSong(url, name, startTime) {
-    if (currentUrl === url) {
-      if (!isPlaying && !userPaused) playCurrent();
-      return;
-    }
-    currentUrl   = url;
-    currentStart = startTime || 0;
-    titleEl.textContent = name;
-
-    audio.oncanplay = null;
-    fadeVol(audio.volume, 0, 250);
-
-    setTimeout(() => {
-      audio.pause();
-      audio.src    = url;
-      audio.volume = 0;
-      audio.load();
-      audio.oncanplay = function() {
-        audio.oncanplay = null;
-        if (userPaused) return;
-        audio.currentTime = currentStart;
-        playCurrent();
-      };
-    }, 280);
-  }
-
-  audio.addEventListener('ended', () => {
-    audio.currentTime = currentStart;
-    playCurrent();
+  const audio=document.getElementById('bg-audio');
+  const titleEl=document.getElementById('music-title');
+  const toggleBtn=document.getElementById('music-toggle');
+  const iconPlay=document.getElementById('icon-play');
+  const iconPause=document.getElementById('icon-pause');
+  const eq=document.getElementById('eq');
+  let currentUrl=null,isPlaying=false,userStarted=false,userPaused=false;
+  const moments=document.querySelectorAll('.moment');
+  audio.src='Moment.mp3'; audio.volume=0; currentUrl='Moment.mp3'; titleEl.textContent='Magic';
+  function fadeVol(from,to,ms){ const steps=30,dt=ms/steps; let n=0; audio.volume=Math.max(0,Math.min(1,from)); const t=setInterval(()=>{ n++; audio.volume=Math.max(0,Math.min(1,from+(to-from)*(n/steps))); if(n>=steps)clearInterval(t); },dt); }
+  function setUI(p){ isPlaying=p; iconPlay.style.display=p?'none':'block'; iconPause.style.display=p?'block':'none'; eq.classList.toggle('paused',!p); }
+  function swapSong(url,name,st){ if(currentUrl===url)return; currentUrl=url; titleEl.textContent=name; fadeVol(audio.volume,0,300); setTimeout(()=>{ audio.src=url; audio.volume=0; audio.currentTime=st||0; if(!userPaused) audio.play().then(()=>{ audio.currentTime=st||0; setUI(true); fadeVol(0,0.45,900); }).catch(()=>{}); },320); }
+  toggleBtn.addEventListener('click',()=>{
+    if(!userStarted){ userStarted=true; userPaused=false; audio.play().then(()=>{ setUI(true); fadeVol(0,0.45,800); }).catch(()=>{}); }
+    else if(isPlaying){ fadeVol(audio.volume,0,400); setTimeout(()=>{ audio.pause(); setUI(false); },420); userPaused=true; }
+    else { userPaused=false; audio.play().then(()=>{ setUI(true); fadeVol(0,0.45,600); }).catch(()=>{}); }
   });
-
-  toggleBtn.addEventListener('click', () => {
-    if (!userStarted) {
-      userStarted = true;
-      userPaused  = false;
-      playCurrent();
-    } else if (isPlaying) {
-      fadeVol(audio.volume, 0, 400);
-      setTimeout(() => { audio.pause(); setUI(false); }, 420);
-      userPaused = true;
-    } else {
-      userPaused = false;
-      playCurrent();
-    }
-  });
-
-  // ── Reveal observer ──
-  const revealObs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.1 });
-  moments.forEach(m => revealObs.observe(m));
-
-  const heroZoneEls = [
-    document.getElementById('hero'),
-    document.getElementById('celebrate'),
-    document.getElementById('moments-intro')
-  ].filter(Boolean);
-
-  function getActiveMoment() {
-    const mid = window.innerHeight / 2;
-    let best = null, bestDist = Infinity;
-    moments.forEach(m => {
-      const r = m.getBoundingClientRect();
-      const dist = Math.abs((r.top + r.height / 2) - mid);
-      if (dist < bestDist) { bestDist = dist; best = m; }
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      e.target.classList.add('visible');
+      const url=e.target.dataset.songUrl, name=e.target.dataset.songName, st=parseFloat(e.target.dataset.startTime)||0;
+      if(userStarted&&!userPaused){
+        if(currentUrl===url){ if(!isPlaying){ audio.currentTime=st; audio.play().then(()=>{ audio.currentTime=st; setUI(true); fadeVol(0,0.45,900); }).catch(()=>{}); } }
+        else swapSong(url,name,st);
+      } else if(!userStarted){ if(currentUrl!==url){ currentUrl=url; audio.src=url; audio.volume=0; titleEl.textContent=name; } }
     });
-    return best;
-  }
+  },{threshold:0.35});
+  moments.forEach(m=>obs.observe(m));
 
-  function getActiveSection() {
-    const mid = window.innerHeight / 2;
-    let heroDist = Infinity;
-    heroZoneEls.forEach(el => {
-      const r = el.getBoundingClientRect();
-      if (r.bottom > 0 && r.top < window.innerHeight)
-        heroDist = Math.min(heroDist, Math.abs((r.top + r.height / 2) - mid));
+  // Hero sections → play Coldplay (Moment.mp3)
+  const heroSections = ['hero','celebrate','moments-intro'].map(id=>document.getElementById(id)).filter(Boolean);
+  const heroObs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting||!userStarted||userPaused) return;
+      if(currentUrl!=='Moment.mp3'){ currentUrl='Moment.mp3'; titleEl.textContent='Magic'; fadeVol(audio.volume,0,300); setTimeout(()=>{ audio.src='Moment.mp3'; audio.volume=0; audio.currentTime=18; if(!userPaused) audio.play().then(()=>{ audio.currentTime=18; setUI(true); fadeVol(0,0.45,900); }).catch(()=>{}); },320); }
     });
-    const best = getActiveMoment();
-    if (!best) return { type: 'hero' };
-    const r = best.getBoundingClientRect();
-    const momentDist = Math.abs((r.top + r.height / 2) - mid);
-    if (heroDist < momentDist) return { type: 'hero' };
-    return { type: 'moment', el: best };
-  }
-
-  let scrollTimer = null;
-  let lastSongUrl = null;
-
-  function onScroll() {
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => {
-      if (!userStarted || userPaused) return;
-      const active = getActiveSection();
-      let url, name, st;
-      if (active.type === 'hero') {
-        url = INTRO_SONG.url; name = INTRO_SONG.name; st = INTRO_SONG.start;
-      } else {
-        url  = active.el.dataset.songUrl;
-        name = active.el.dataset.songName;
-        st   = parseFloat(active.el.dataset.startTime) || 0;
-      }
-      if (url !== lastSongUrl) {
-        lastSongUrl = url;
-        swapSong(url, name, st);
-      }
-    }, 120);
-  }
-
-  window.addEventListener('scroll', onScroll, { passive: true });
-
-  window.addEventListener('unlocked', () => {
-    setTimeout(onScroll, 500);
-  });
+  },{threshold:0.3});
+  heroSections.forEach(s=>heroObs.observe(s));
 </script>
 </body>
 </html>
