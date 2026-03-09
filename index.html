@@ -202,7 +202,11 @@
     @keyframes eq-bounce { 0%{transform:scaleY(0.4)} 100%{transform:scaleY(1)} }
     .eq.paused .eq-bar { animation-play-state:paused; }
 
-
+    /* ══════════ INTRO MOMENT ══════════ */
+    #intro-moment .moment-text     { grid-column:1 !important; grid-row:1 !important; }
+    #intro-moment .moment-dot-col  { grid-column:2 !important; grid-row:1 !important; }
+    #intro-moment .moment-img-wrap { grid-column:3 !important; grid-row:1 !important; }
+    #intro-moment .moment-year     { color:var(--rose); }
 
     /* ══════════ TIMELINE ══════════ */
     #timeline { background:var(--dark); padding:0 0 140px; position:relative; }
@@ -271,11 +275,14 @@
       .timeline-line{left:20px}
       .moment{grid-template-columns:40px 1fr;grid-template-rows:auto auto;min-height:unset}
       .moment:nth-child(odd) .moment-img-wrap,
-      .moment:nth-child(even) .moment-img-wrap
+      .moment:nth-child(even) .moment-img-wrap,
+      #intro-moment .moment-img-wrap{grid-column:2!important;grid-row:2!important}
       .moment:nth-child(odd) .moment-dot-col,
-      .moment:nth-child(even) .moment-dot-col
+      .moment:nth-child(even) .moment-dot-col,
+      #intro-moment .moment-dot-col{grid-column:1!important;grid-row:1!important}
       .moment:nth-child(odd) .moment-text,
-      .moment:nth-child(even) .moment-text
+      .moment:nth-child(even) .moment-text,
+      #intro-moment .moment-text{grid-column:2!important;grid-row:1!important}
       .moment-img-wrap{padding:16px 20px}
       .moment-text{padding:30px 20px}
       #intro-moment{min-height:auto}
@@ -391,12 +398,9 @@
 <section id="timeline">
   <div class="timeline-line"></div>
 
-  <div class="moment" data-song-url="Momentt.mp3" data-start-time="29" data-song-name="Raktim">
-  <div class="moment-img-wrap">
-    <div class="moment-img-frame">
-      <img src="IMGi.jpeg" alt=""/>
-    </div>
-  </div>
+  <!-- INTRO MOMENT (inside timeline so spine covers it) -->
+<div id="intro-moment" class="moment visible" data-song-url="Momentt.mp3" data-start-time="29" data-song-name="Raktim">
+  <div class="moment-img-wrap"><div class="moment-img-frame"><img src="IMGi.jpeg" alt=""/></div></div>
   <div class="moment-dot-col"><div class="moment-dot"></div></div>
   <div class="moment-text">
     <p class="moment-year">✦ Where It All Began</p>
@@ -656,20 +660,15 @@
     fadeVol(audio.volume, 0, 300);
     setTimeout(() => {
       audio.src = url;
-      audio.load();
       audio.volume = 0;
-      audio.oncanplay = null;
-      audio.oncanplay = () => {
-        audio.oncanplay = null;
-        audio.currentTime = currentStart;
-        if (!userPaused) {
-          audio.play().then(() => {
-            audio.currentTime = currentStart;
-            setUI(true);
-            fadeVol(0, 0.45, 900);
-          }).catch(() => {});
-        }
-      };
+      audio.currentTime = currentStart;
+      if (!userPaused) {
+        audio.play().then(() => {
+          audio.currentTime = currentStart;
+          setUI(true);
+          fadeVol(0, 0.45, 900);
+        }).catch(() => {});
+      }
     }, 320);
   }
 
@@ -717,17 +716,23 @@
     return best;
   }
 
+  // All sections before the timeline play Coldplay (INTRO_SONG)
+  const heroZoneEls = [
+    document.getElementById('hero'),
+    document.getElementById('celebrate'),
+    document.getElementById('moments-intro')
+  ].filter(Boolean);
+
   function getActiveSection() {
-    // Returns 'hero' if hero/intro is most centered, else returns the closest moment el
     const mid = window.innerHeight / 2;
-    // Check hero
-    const heroR = heroEl ? heroEl.getBoundingClientRect() : null;
-    const introR = introEl ? introEl.getBoundingClientRect() : null;
+
+    // Distance of closest hero-zone section to screen center
     let heroDist = Infinity;
-    if (heroR && heroR.bottom > 0 && heroR.top < window.innerHeight)
-      heroDist = Math.abs((heroR.top + heroR.height / 2) - mid);
-    if (introR && introR.bottom > 0 && introR.top < window.innerHeight)
-      heroDist = Math.min(heroDist, Math.abs((introR.top + introR.height / 2) - mid));
+    heroZoneEls.forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < window.innerHeight)
+        heroDist = Math.min(heroDist, Math.abs((r.top + r.height / 2) - mid));
+    });
 
     const best = getActiveMoment();
     if (!best) return { type: 'hero' };
