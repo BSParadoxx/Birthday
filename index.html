@@ -662,7 +662,6 @@
 
   function swapSong(url, name, startTime) {
     if (currentUrl === url) {
-      // Same song — just make sure it's playing
       if (!isPlaying && !userPaused) {
         audio.play().then(() => { setUI(true); fadeVol(audio.volume, 0.45, 600); }).catch(() => {});
       }
@@ -671,18 +670,33 @@
     currentUrl   = url;
     currentStart = startTime || 0;
     titleEl.textContent = name;
+
+    // Cancel any pending oncanplay from a previous swap
+    audio.oncanplay = null;
+
     fadeVol(audio.volume, 0, 300);
     setTimeout(() => {
+      audio.pause();
       audio.src = url;
       audio.volume = 0;
-      audio.currentTime = currentStart;
-      if (!userPaused) {
+      audio.load();
+
+      audio.oncanplay = function() {
+        audio.oncanplay = null;
+        if (userPaused) return;
+        audio.currentTime = currentStart;
         audio.play().then(() => {
           audio.currentTime = currentStart;
           setUI(true);
           fadeVol(0, 0.45, 900);
-        }).catch(() => {});
-      }
+        }).catch(err => {
+          // Fallback: retry once after short delay
+          setTimeout(() => {
+            if (userPaused) return;
+            audio.play().then(() => { setUI(true); fadeVol(0, 0.45, 600); }).catch(() => {});
+          }, 400);
+        });
+      };
     }, 320);
   }
 
