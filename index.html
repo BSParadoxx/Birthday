@@ -545,6 +545,9 @@
     userStarted = true;
     userPaused  = false;
 
+    // Create & resume AudioContext inside gesture — permanently unlocks audio on GitHub Pages
+    unlockAudioContext();
+
     // Play Coldplay intro directly inside gesture — this permanently unlocks the audio element
     audio.src         = INTRO_SONG.url;
     audio.volume      = 0;
@@ -622,24 +625,30 @@
   const iconPause = document.getElementById('icon-pause');
   const eq        = document.getElementById('eq');
 
-  // ── Intro song: plays right after passcode unlock, on hero/intro sections ──
   const INTRO_SONG = { url: 'Moment.mp3', name: 'Magic', start: 18 };
 
-  let currentUrl    = null;   // url of the currently loaded song
-  let currentStart  = 0;      // the start-time this song should loop back to
-  let isPlaying     = false;
-  let userStarted   = false;
-  let userPaused    = false;
+  let currentUrl   = null;
+  let currentStart = 0;
+  let isPlaying    = false;
+  let userStarted  = false;
+  let userPaused   = false;
+  let audioCtx     = null;
 
   const moments = document.querySelectorAll('.moment');
 
-  // Audio element starts empty — song is set on unlock
-
-  // ── When a song reaches its end, restart from its own start-time ──
-  audio.addEventListener('ended', () => {
-    audio.currentTime = currentStart;
-    audio.play().then(() => { setUI(true); fadeVol(0, 0.45, 600); }).catch(() => {});
-  });
+  // ── Unlock Web Audio Context on first gesture (passcode tap) ──
+  // This is the key fix for GitHub Pages: once AudioContext is resumed
+  // inside a user gesture, all subsequent audio.play() calls are allowed
+  // even from scroll callbacks and setTimeout chains.
+  function unlockAudioContext() {
+    if (audioCtx) return;
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const src = audioCtx.createMediaElementSource(audio);
+      src.connect(audioCtx.destination);
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch(e) {}
+  }
 
   function fadeVol(from, to, ms) {
     const steps = 30, dt = ms / steps;
@@ -659,108 +668,99 @@
     eq.classList.toggle('paused', !playing);
   }
 
+  function playCurrent() {
+    if (userPaused) return;
+    // Resume AudioContext if suspended (mobile browsers suspend it when idle)
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    audio.play().then(() => {
+      setUI(true);
+      fadeVol(0, 0.45, 800);
+    }).catch(() => {
+      setTimeout(() => {
+        if (userPaused) return;
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        audio.play().then(() => { setUI(true); fadeVol(0, 0.45, 600); }).catch(() => {});
+      }, 300);
+    });
+  }
+
   function swapSong(url, name, startTime) {
     if (currentUrl === url) {
-      if (!isPlaying && !userPaused) {
-        audio.play().then(() => { setUI(true); fadeVol(audio.volume, 0.45, 600); }).catch(() => {});
-      }
+      if (!isPlaying && !userPaused) playCurrent();
       return;
     }
     currentUrl   = url;
     currentStart = startTime || 0;
     titleEl.textContent = name;
 
-    // Cancel any pending oncanplay from a previous swap
     audio.oncanplay = null;
+    fadeVol(audio.volume, 0, 250);
 
-    fadeVol(audio.volume, 0, 300);
     setTimeout(() => {
       audio.pause();
-      audio.src = url;
+      audio.src    = url;
       audio.volume = 0;
       audio.load();
-
       audio.oncanplay = function() {
         audio.oncanplay = null;
         if (userPaused) return;
         audio.currentTime = currentStart;
-        audio.play().then(() => {
-          audio.currentTime = currentStart;
-          setUI(true);
-          fadeVol(0, 0.45, 900);
-        }).catch(err => {
-          // Fallback: retry once after short delay
-          setTimeout(() => {
-            if (userPaused) return;
-            audio.play().then(() => { setUI(true); fadeVol(0, 0.45, 600); }).catch(() => {});
-          }, 400);
-        });
+        playCurrent();
       };
-    }, 320);
+    }, 280);
   }
 
-  // ── Play / Pause button ──
+  audio.addEventListener('ended', () => {
+    audio.currentTime = currentStart;
+    playCurrent();
+  });
+
   toggleBtn.addEventListener('click', () => {
     if (!userStarted) {
       userStarted = true;
       userPaused  = false;
-      audio.play().then(() => { setUI(true); fadeVol(0, 0.45, 800); }).catch(() => {});
+      playCurrent();
     } else if (isPlaying) {
       fadeVol(audio.volume, 0, 400);
       setTimeout(() => { audio.pause(); setUI(false); }, 420);
       userPaused = true;
     } else {
       userPaused = false;
-      audio.play().then(() => { setUI(true); fadeVol(0, 0.45, 600); }).catch(() => {});
+      playCurrent();
     }
   });
 
-  /* ── Intersection Observer ──
-     Watches hero, intro sections AND every moment.
-     Hero/intro → play intro song.
-     Moment → play that moment's song.
-  */
-  // ── Reveal observer (visibility only, no music logic) ──
+  // ── Reveal observer ──
   const revealObs = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
   }, { threshold: 0.1 });
   moments.forEach(m => revealObs.observe(m));
 
-  // ── Song control: find the moment whose CENTER is closest to screen center ──
-  // This is the only place songs change — no race conditions, no random jumps.
-  const heroEl  = document.getElementById('hero');
-  const introEl = document.getElementById('moments-intro');
-
-  function getActiveMoment() {
-    const mid = window.innerHeight / 2;
-    let best = null, bestDist = Infinity;
-    moments.forEach(m => {
-      const r = m.getBoundingClientRect();
-      const center = r.top + r.height / 2;
-      const dist = Math.abs(center - mid);
-      if (dist < bestDist) { bestDist = dist; best = m; }
-    });
-    return best;
-  }
-
-  // All sections before the timeline play Coldplay (INTRO_SONG)
   const heroZoneEls = [
     document.getElementById('hero'),
     document.getElementById('celebrate'),
     document.getElementById('moments-intro')
   ].filter(Boolean);
 
+  function getActiveMoment() {
+    const mid = window.innerHeight / 2;
+    let best = null, bestDist = Infinity;
+    moments.forEach(m => {
+      const r = m.getBoundingClientRect();
+      const dist = Math.abs((r.top + r.height / 2) - mid);
+      if (dist < bestDist) { bestDist = dist; best = m; }
+    });
+    return best;
+  }
+
   function getActiveSection() {
     const mid = window.innerHeight / 2;
-
-    // Distance of closest hero-zone section to screen center
     let heroDist = Infinity;
     heroZoneEls.forEach(el => {
       const r = el.getBoundingClientRect();
       if (r.bottom > 0 && r.top < window.innerHeight)
         heroDist = Math.min(heroDist, Math.abs((r.top + r.height / 2) - mid));
     });
-
     const best = getActiveMoment();
     if (!best) return { type: 'hero' };
     const r = best.getBoundingClientRect();
@@ -773,7 +773,6 @@
   let lastSongUrl = null;
 
   function onScroll() {
-    // Debounce — wait until scrolling settles for 120ms
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(() => {
       if (!userStarted || userPaused) return;
@@ -795,7 +794,6 @@
 
   window.addEventListener('scroll', onScroll, { passive: true });
 
-  // After unlock, trigger a scroll check so the right song starts
   window.addEventListener('unlocked', () => {
     setTimeout(onScroll, 500);
   });
