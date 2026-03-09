@@ -295,6 +295,15 @@
         
 
   </style>
+  <link rel="preload" href="Moment.mp3"  as="audio" type="audio/mpeg">
+  <link rel="preload" href="Momentt.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="Moment1.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="Moment2.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="Moment3.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="Moment4.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="Moment5.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="Moment6.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="Moment7.mp3" as="audio" type="audio/mpeg">
 </head>
 <body>
 
@@ -543,10 +552,12 @@
     audio.load();
     audio.play().then(() => {
       audio.currentTime=18; setUI(true); fadeVol(0,0.45,900); userStarted=true;
-      // Prime Momentt.mp3 inside gesture so GitHub allows it later
-      const primer = new Audio('Momentt.mp3');
-      primer.volume=0;
-      primer.play().then(()=>{ primer.pause(); primer.src=''; }).catch(()=>{});
+      // Prime all 8 moment songs inside gesture so GitHub allows them all
+      moments.forEach(m => {
+        const a = new Audio(m.dataset.songUrl);
+        a.volume=0;
+        a.play().then(()=>{ a.pause(); a.src=''; }).catch(()=>{});
+      });
     }).catch(() => { userStarted=true; });
   }
   document.querySelectorAll('.lock-key[data-num]').forEach(key => {
