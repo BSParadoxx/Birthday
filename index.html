@@ -400,7 +400,11 @@
 
   <!-- INTRO MOMENT (inside timeline so spine covers it) -->
 <div id="intro-moment" class="moment visible" data-song-url="Momentt.mp3" data-start-time="29" data-song-name="Raktim">
-  <div class="moment-img-wrap"><div class="moment-img-frame"><img src="IMGi.jpeg" alt=""/></div></div>
+  <div class="moment-img-wrap">
+    <div class="moment-img-frame">
+      <img src="IMGi.jpeg" alt=""/>
+    </div>
+  </div>
   <div class="moment-dot-col"><div class="moment-dot"></div></div>
   <div class="moment-text">
     <p class="moment-year">✦ Where It All Began</p>
@@ -549,7 +553,17 @@
       audio.currentTime = INTRO_SONG.start;
       setUI(true);
       fadeVol(0, 0.45, 900);
+
     }).catch(() => {});
+
+    // Preload all moment songs inside user gesture context so GitHub allows them
+    ['Momentt.mp3','Moment1.mp3','Moment2.mp3','Moment3.mp3','Moment4.mp3','Moment5.mp3','Moment6.mp3','Moment7.mp3'].forEach(src => {
+      const a = new Audio();
+      a.src = src;
+      a.load();
+      a.volume = 0;
+      a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
+    });
 
     // Trigger scroll check after unlock animation settles
     setTimeout(() => window.dispatchEvent(new Event('unlocked')), 700);
